@@ -5,6 +5,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -19,7 +20,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { passwordMatchSchema } from "@/validation/passwordMatchSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { register } from "module";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { registerUser } from "./actions";
@@ -54,7 +54,7 @@ export default function Register() {
       });
     }
 
-    console.log(response);
+     console.log(response);
   };
 
   return (
@@ -127,6 +127,14 @@ export default function Register() {
               </form>
             </Form>
           </CardContent>
+           <CardFooter className="flex-col gap-2">
+            <div className="text-muted-foreground text-sm">
+                Already have an account?{" "}
+                <Link href="/login" className="underline">
+                  Logon
+                </Link>
+            </div>
+          </CardFooter>
         </Card>
       )}
     </main>

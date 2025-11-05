@@ -19,7 +19,7 @@ export const registerUser = async ({
     try {
     const newUserSchema = z
       .object({
-        email: z.string().email(),
+        email: z.email(),
       })
       .and(passwordMatchSchema);
 
@@ -50,8 +50,9 @@ export const registerUser = async ({
             message: "An account is already registered with that email address.",
         }
     }
-
+    
     return {
+        errorObj: e,
       error: true,
       message: "An error occurred.",
     };
