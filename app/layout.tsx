@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { auth } from "@/auth";
+import { Toaster } from "@/components/ui/sonner";
 
 // const geistSans = Geist({
 //   variable: "--font-geist-sans",
@@ -29,6 +30,7 @@ export default async function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         {children}
+        <Toaster />
       </body>
     </html>
   );
