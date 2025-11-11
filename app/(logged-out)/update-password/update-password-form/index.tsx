@@ -9,6 +9,7 @@ import { useForm } from "react-hook-form";
 import z from "zod";
 import { toast } from "sonner";
 import { updatePassword } from "./actions";
+import Link from "next/link";
 
 const formSchema = passwordMatchSchema;
 
@@ -44,7 +45,14 @@ const handleSubmit = async (data: z.infer<typeof formSchema>) => {
     }
   };
 
-  return (
+  return form.formState.isSubmitSuccessful ? (
+    <div>
+        Your password has been updated.{" "}
+        <Link className="underline" href="/login">
+            Click here to login to your account
+        </Link>
+    </div>
+  ) : (
            <Form {...form}>
               <form onSubmit={form.handleSubmit(handleSubmit)}>
                 <fieldset
@@ -86,5 +94,5 @@ const handleSubmit = async (data: z.infer<typeof formSchema>) => {
                 </fieldset>
               </form>
             </Form>
-  )
+  );
 }
