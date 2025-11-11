@@ -18,6 +18,7 @@ import z from "zod";
 import { loginWithCredentials } from "./action";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 const formSchema = z
   .object({
@@ -36,7 +37,10 @@ export default function Login() {
   });
 
     const handleSubmit = async (data: z.infer<typeof formSchema>) => {
-        const response = await loginWithCredentials({
+      
+      console.log(data.email);
+      
+      const response = await loginWithCredentials({
             email: data.email, 
             password: data.password
         })
@@ -49,7 +53,14 @@ export default function Login() {
         }else {
             router.push("/my-account");
         }
+
     };
+
+     const email = form.watch("email");
+    // console.log("email=", email);
+
+    //  const [email, setEmail] = useState("");
+    //  console.log("email=", email);
 
     return(
         <main className="flex justify-center items-center min-h-screen">
@@ -72,7 +83,8 @@ export default function Login() {
                       <FormItem>
                         <FormLabel>Email</FormLabel>
                         <FormControl>
-                          <Input {...field} type="email" />
+                          <Input {...field} type="email" 
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -110,9 +122,14 @@ export default function Login() {
             </div>
             <div className="text-muted-foreground text-sm">
                 Forgot password?{" "}
-                <Link href="/password-reset" className="underline">
-                  Reset my password
-                </Link>
+            <Link
+                href={`/password-reset${
+                  email ? `?email=${encodeURIComponent(email)}` : ""
+                }`}
+                className="underline"
+              >
+                Reset my password
+              </Link>
             </div>
           </CardFooter>
         </Card>

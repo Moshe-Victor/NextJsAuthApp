@@ -1,0 +1,90 @@
+"use client"
+
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { passwordMatchSchema } from "@/validation/passwordMatchSchema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import z from "zod";
+import { toast } from "sonner";
+import { updatePassword } from "./actions";
+
+const formSchema = passwordMatchSchema;
+
+type Props = {
+    token: string;
+}
+
+  export default function UpdatePasswordForm({token} : Props) {
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      password: "",
+      passwordConfirm: "",
+    },
+  });
+
+const handleSubmit = async (data: z.infer<typeof formSchema>) => {
+     const response = await updatePassword({
+      token,
+      password: data.password,
+      passwordConfirm: data.passwordConfirm,
+    });
+
+    if (response?.error) {
+      form.setError("root", {
+        message: response.message,
+      });
+    } else {
+      toast(
+        "Your password has been updated."
+      );
+      form.reset();
+    }
+  };
+
+  return (
+           <Form {...form}>
+              <form onSubmit={form.handleSubmit(handleSubmit)}>
+                <fieldset
+                  disabled={form.formState.isSubmitting}
+                  className="flex flex-col gap-2"
+                >
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>New Password</FormLabel>
+                        <FormControl>
+                          <Input {...field} type="password" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="passwordConfirm"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>New Password confirm</FormLabel>
+                        <FormControl>
+                          <Input {...field} type="password" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  {!!form.formState.errors.root?.message &&
+                    <FormMessage>
+                      {form.formState.errors.root?.message}
+                    </FormMessage>
+                  }
+                  <Button type="submit">Update Password</Button>
+                </fieldset>
+              </form>
+            </Form>
+  )
+}

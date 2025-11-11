@@ -1,3 +1,5 @@
+"use server";
+
 import { signIn } from "@/auth";
 import { passwordSchema } from "@/validation/passwordSchema";
 import z from "zod";
@@ -36,10 +38,9 @@ export const loginWithCredentials = async ({
       redirect: false,
     });
   } catch (e) {
-    // return {
-    //   error: true,
-    //   message: "Incorrect email or password",
-    // };
+    return {
+      error: true,
+      message: "Incorrect email or password",
+    };
   }
-
 }
