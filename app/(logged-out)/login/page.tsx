@@ -15,10 +15,12 @@ import { passwordSchema } from "@/validation/passwordSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import z from "zod";
-import { loginWithCredentials } from "./action";
+import { loginWithCredentials, preLoginCheck } from "./action";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from "@/components/ui/input-otp";
+import { toast } from "sonner";
 
 const formSchema = z
   .object({
@@ -27,6 +29,8 @@ const formSchema = z
   });
 
 export default function Login() {
+    const [step, setStep] = useState(1);
+    const [otp, setOtp] = useState("");
     const router = useRouter();
     const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -38,8 +42,22 @@ export default function Login() {
 
     const handleSubmit = async (data: z.infer<typeof formSchema>) => {
       
-      console.log(data.email);
-      
+      // console.log(data.email);
+      const preLoginCheckResponse = await preLoginCheck({
+        email: data.email,
+        password: data.password,
+      });
+
+      if (preLoginCheckResponse.error){
+        form.setError("root", {
+                message: preLoginCheckResponse.message
+            })
+            return;
+      }
+
+      if (preLoginCheckResponse.twoFactorActivated){
+        setStep(2);
+      } else {
       const response = await loginWithCredentials({
             email: data.email, 
             password: data.password
@@ -55,16 +73,30 @@ export default function Login() {
         }
 
     };
-
+  }
      const email = form.watch("email");
-    // console.log("email=", email);
 
-    //  const [email, setEmail] = useState("");
-    //  console.log("email=", email);
+     const handleOTPSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
+        const response = await loginWithCredentials({
+            email: form.getValues("email"), 
+            password: form.getValues("password"),
+            token: otp
+        });
+
+        if (response?.error){   
+         toast(response.message);
+        } else {
+            router.push("/my-account");
+        }
+
+     };
 
     return(
         <main className="flex justify-center items-center min-h-screen">
-            <Card className="w-[350px]">
+          {step === 1 && (
+          <Card className="w-[350px]">
           <CardHeader>
             <CardTitle>Login</CardTitle>
             <CardDescription>Login to your account.</CardDescription>
@@ -133,6 +165,38 @@ export default function Login() {
             </div>
           </CardFooter>
         </Card>
+        )}
+        {step === 2 && (
+          <Card className="w-[350px]">
+            <CardHeader>
+               <CardTitle>One-Time Passcode</CardTitle>
+              <CardDescription>
+                Enter the one-time passcode for WebDevEducation displayed in your
+                Google Authenticator app.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleOTPSubmit} className="flex flex-col gap-2">
+               <InputOTP maxLength={6} value={otp} onChange={setOtp}>
+                    <InputOTPGroup>
+                        <InputOTPSlot index={0} />
+                        <InputOTPSlot index={1} />
+                        <InputOTPSlot index={2} />
+                    </InputOTPGroup>
+                    <InputOTPSeparator />
+                    <InputOTPGroup>
+                        <InputOTPSlot index={3} />
+                        <InputOTPSlot index={4} />
+                        <InputOTPSlot index={5} />
+                    </InputOTPGroup>
+                </InputOTP>
+                <Button disabled={otp.length !==6} type="submit">
+                  Verify OTP
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        )} 
         </main>
     )
 }
